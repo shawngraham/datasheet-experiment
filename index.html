@@ -27,6 +27,22 @@
       text-align: left;
       border-bottom: 1px solid #ddd;
     }
+
+    .histogram {
+      display: flex;
+      align-items: flex-end;
+      height: 200px;
+      margin-top: 20px;
+    }
+
+    .histogram-bar {
+      width: 50px;
+      margin-right: 10px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -36,6 +52,9 @@
 
   <h2>Summary Data</h2>
   <div id="summary"></div>
+
+  <h2>Histograms</h2>
+  <div id="histograms"></div>
 
   <script>
     // Fetch the CSV file from the same repository
@@ -93,6 +112,38 @@
             </tr>
           </table>
         `;
+
+        // Generate histograms for text columns
+        const histogramsDiv = document.getElementById('histograms');
+        headers.forEach((header, index) => {
+          // Check if the column contains text values
+          if (isNaN(parseFloat(records[0][index]))) {
+            const counts = {};
+            records.forEach(row => {
+              const value = row[index];
+              counts[value] = (counts[value] || 0) + 1;
+            });
+
+            // Sort the counts and get the top 5 values
+            const topValues = Object.entries(counts)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 5)
+              .map(([value, count]) => ({ value, count }));
+
+            // Create the histogram
+            const histogramHtml = `
+              <h3>${header}</h3>
+              <div class="histogram">
+                ${topValues.map(({ value, count }) => `
+                  <div class="histogram-bar" style="height: ${(count / records.length) * 100}%;">
+                    ${value}<br>${count}
+                  </div>
+                `).join('')}
+              </div>
+            `;
+            histogramsDiv.innerHTML += histogramHtml;
+          }
+        });
       })
       .catch(error => {
         console.error('Error fetching CSV data:', error);
