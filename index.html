@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Data Page</title>
+  <style>
+    /* Add some basic styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSV Data Page</h1>
+
+  <div id="metadata"></div>
+
+  <h2>Summary Data</h2>
+  <div id="summary"></div>
+
+  <script>
+    // Fetch the CSV file from the same repository
+    fetch('data.csv')
+      .then(response => response.text())
+      .then(data => {
+        // Parse the CSV data
+        const rows = data.trim().split('\n');
+        const headers = rows[0].split(',');
+        const records = rows.slice(1).map(row => row.split(','));
+
+        // Display the metadata
+        const metadataDiv = document.getElementById('metadata');
+        metadataDiv.innerHTML = `
+          <h2>Metadata</h2>
+          <table>
+            <tr>
+              <th>Columns</th>
+              <td>${headers.join(', ')}</td>
+            </tr>
+            <tr>
+              <th>Number of Records</th>
+              <td>${records.length}</td>
+            </tr>
+          </table>
+        `;
+
+        // Generate summary data
+        const summary = {
+          totalValue: records.reduce((sum, row) => sum + parseFloat(row[1]), 0),
+          averageValue: records.reduce((sum, row) => sum + parseFloat(row[1]), 0) / records.length,
+          maxValue: Math.max(...records.map(row => parseFloat(row[1]))),
+          minValue: Math.min(...records.map(row => parseFloat(row[1]))),
+        };
+
+        // Display the summary data
+        const summaryDiv = document.getElementById('summary');
+        summaryDiv.innerHTML = `
+          <table>
+            <tr>
+              <th>Total Value</th>
+              <td>${summary.totalValue.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th>Average Value</th>
+              <td>${summary.averageValue.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th>Maximum Value</th>
+              <td>${summary.maxValue.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th>Minimum Value</th>
+              <td>${summary.minValue.toFixed(2)}</td>
+            </tr>
+          </table>
+        `;
+      })
+      .catch(error => {
+        console.error('Error fetching CSV data:', error);
+        document.body.innerHTML = '<h1>Error loading data</h1>';
+      });
+  </script>
+</body>
+</html>
